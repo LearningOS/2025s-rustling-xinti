@@ -6,6 +6,6 @@
 // hint.
 
 
-fn main() {
-    println!("Hello world! {}","yuedk!");
+fn main() { 
+    println!("Hello world! ");
 }
