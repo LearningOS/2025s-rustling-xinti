@@ -2,11 +2,10 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
-use std::vec::*;
+//use std::vec::*;
 
 #[derive(Debug)]
 struct Node<T> {
@@ -29,13 +28,13 @@ struct LinkedList<T> {
     end: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Default for LinkedList<T> {
+impl<T: std::cmp::PartialOrd> Default for LinkedList<T> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T> LinkedList<T> {
+impl<T:std::cmp::PartialOrd> LinkedList<T> {
     pub fn new() -> Self {
         Self {
             length: 0,
@@ -71,12 +70,50 @@ impl<T> LinkedList<T> {
     }
 	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
 	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+		let mut result = LinkedList::new();
+        let mut list_a = list_a;
+        let mut list_b = list_b;
+        while let (Some(a_node), Some(b_node)) = (list_a.start, list_b.start) {
+            let a_val = unsafe { &(*a_node.as_ptr()).val };
+            let b_val = unsafe { &(*b_node.as_ptr()).val };
+            if a_val <= b_val {
+                let node = unsafe { Box::from_raw(a_node.as_ptr()) };
+                result.add(node.val);
+                list_a.start = node.next;
+                if list_a.start.is_none() {
+                    list_a.end = None;
+                }
+            } else {
+                let node = unsafe { Box::from_raw(b_node.as_ptr()) };
+                result.add(node.val);
+                list_b.start = node.next;
+                if list_b.start.is_none() {
+                    list_b.end = None;
+                }
+            }
         }
+        // 将剩余的节点添加到结果链表中
+        if let Some(node) = list_a.start {
+            let mut current = node;
+            while let Some(next) = unsafe { (*current.as_ptr()).next } {
+                let node = unsafe { Box::from_raw(current.as_ptr()) };
+                result.add(node.val);
+                current = next;
+            }
+            let node = unsafe { Box::from_raw(current.as_ptr()) };
+            result.add(node.val);
+        }
+        if let Some(node) = list_b.start {
+            let mut current = node;
+            while let Some(next) = unsafe { (*current.as_ptr()).next } {
+                let node = unsafe { Box::from_raw(current.as_ptr()) };
+                result.add(node.val);
+                current = next;
+            }
+            let node = unsafe { Box::from_raw(current.as_ptr()) };
+            result.add(node.val);
+        }
+        result
 	}
 }
 
